@@ -8,7 +8,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-
+  <link href="style.css" rel="stylesheet">
     <title>Index</title>
 </head>
 <style>
@@ -120,7 +120,7 @@
         }
   </style>
   <header >
-    <nav>
+    <!-- <nav>
       <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/about">About</a></li>
@@ -128,7 +128,34 @@
         <li><a href="/login" >Login</a></li>
         <li><a href="/signUp">Signup</a></li>
       </ul>
-    </nav>
+    </nav> -->
+    <nav class="navbar navbar-expand-md navbar-light bg-light sticky-top">
+      <div class="container-fluid">
+        <a class="navbar-brand text-primary font-weight-bold" href="/"><img src="" height="40">GOALS</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/about">About Us</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/contact">Contact US</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/login">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/signUp">SignUp</a>
+            </li>
+          </ul>
+        </div>
+      </div>	
+      </nav>
   </header>
   <img src="https://wallpapercave.com/wp/wp1984354.jpg" style="width:100%;">
 
