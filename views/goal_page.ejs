@@ -14,30 +14,69 @@
 <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
+      background-color: #0e0d0d;
       margin: 0;
       padding: 0;
     }
     h1 {
-      color: #333;
+      color: #faf6f6;
       text-align: center;
       margin-top: 50px;
     }
+    h2 {
+      color: #faf6f6;
+      text-align: left;
+      margin-top: 50px;
+    }
+    h4 {
+      color: #faf6f6;
+      text-align: left;
+      margin-top: 50px;
+    }
+    h5{
+      color: #faf6f6;
+      text-align: left;
+      margin-top: 50px;
+    }
     form {
-      width: 300px;
+      width: 100%;
       margin: 0 auto;
       background-color: #fff;
       padding: 20px;
       border-radius: 5px;
       box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
     }
+    @media screen and (min-width: 768px) {
+      form {
+        width: 60%;
+      }
+    }
+    button {
+      
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #4CAF50;
+      color: #f4e9e9;
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 5px;
+       }
+       /* Add media query for small screens */
+@media screen and (max-width: 768px) {
+button {
+  width: 100%;
+}
+}
     a{
         width: 80px;
         margin: 0 auto;
-        background-color: #fff;
+        background-color: #faf7f7;
         padding: 20px;
         border-radius: 5px;
-        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.2);
+        
       } 
 
     label {
@@ -71,36 +110,54 @@
       background-color: #3e8e41;
     }
 
-    button {
-        background-color: #3e8e41;
-        color: #333;
-        font-size: 16px;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-      }
+
       table {
-        border: 1px solid #332a2a;
-        border-collapse: collapse;
         width: 100%;
-        font-family: Arial, sans-serif;
-        font-size: 14px;
+        border-collapse: collapse;
       }
       
-      th, td {
-        border: 1px solid #332a2a;
-        padding: 8px;
+      th, td ,tr{
+        padding: 10px;
         text-align: left;
+        border-bottom: 1px solid #e7dede;
       }
       
       th {
-        border: 1px solid #332a2a;
-        background-color: #f2f2f2;
-        color: #333;
+        background-color: #92f10e;
       }
       
-      tr:nth-child(even) {
-        background-color: #f2f2f2;
+      /* Responsive styles */
+      .table-container {
+        overflow-x: auto;
+      }
+      
+      @media screen and (max-width: 600px) {
+        table, thead, tbody, th, td, tr {
+          display: block;
+        }
+        
+        thead tr {
+          position: absolute;
+          top: -9999px;
+          left: -9999px;
+        }
+        
+        td {
+          border-bottom: none;
+          position: relative;
+          padding-left: 50%;
+        }
+        
+        td:before {
+          position: absolute;
+          top: 6px;
+          left: 6px;
+          width: 45%;
+          padding-right: 10px;
+          white-space: nowrap;
+          content: attr(data-label);
+          font-weight: bold;
+        }
       }
       header {
         background-color: #f07816;
@@ -123,14 +180,7 @@
        color: #333;
        text-decoration: none;
       }
-       button {
-           background-color: #3e8e41;
-           color: #333;
-           font-size: 16px;
-           padding: 10px 20px;
-           border: none;
-           border-radius: .5px;
-         }
+
            
            header {
              background-color: #f07816;
@@ -199,25 +249,31 @@
     <h2>Your Goals:</h2>
 
     <section class="show">
-
+      <div class="table-container">
         <table class="table">
+          <thead>
             <tr>
             <th>Goal</th>
             <th>Start Date`</th>
             <th>End Date</th>
             <th>Description</th>
+            <th></th>
+            <th></th>
         </tr>
+      </thead>
+      <tbody>
         <% goals.forEach(function(user_goal){ %>
             <tr> <td> <h4><%= user_goal.goal %></h4> </td>    
             <td><h5><%= user_goal.start_date %></h5> </td>
             <td><h5><%= user_goal.end_date %></h5></td>
             <td><h5><%= user_goal.desc %></h5></td>
-            <td><a href="/goals/<%= id %>/<%=user_goal._id %>/edit"><button>Edit</button></a></td>
-            <td><form action="/goals/<%= id %>/<%=user_goal._id %>/?_method=DELETE" method="POST"><button>Delete</button></form></td>
+            <td><h5><a href="/goals/<%= id %>/<%=user_goal._id %>/edit"><button>Edit</button></a></h5></td>
+            <td><h5><form action="/goals/<%= id %>/<%=user_goal._id %>/?_method=DELETE" method="POST"><button>Delete</button></form></h5></td>
             </tr>
-        <% }) %>
+        <% }) %>        
+      </tbody>
     </table>
-
+  </div>
     </section>
  
 </body>
