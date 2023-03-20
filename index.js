@@ -6,6 +6,8 @@ const methodOverride = require("method-override");
 const mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
 const cookieParser = require("cookie-parser");
+const nodemailer = require('nodemailer');
+
 const secretKey = 'gauravsourav';
 let TOKEN;
 
@@ -30,7 +32,8 @@ mongoose.connect("mongodb+srv://root:root@cluster0.jypbz.mongodb.net/goal_tracke
 var userSchema = new mongoose.Schema({
     name:String,
     email:String,
-    password:String
+    password:String,
+    otp:String
 })
 
 const User = mongoose.model("User",userSchema);
@@ -63,6 +66,105 @@ function formatDate(date) {
     const year = date.getFullYear();
     return `${year}-${month}-${day}`;
 }
+
+function randomNumberGeneratorForOtp()
+{
+    const min = 100000; 
+    const max = 999999; 
+    let randomNum = Math.floor(Math.random() * (max - min + 1)) + min; 
+    return randomNum;
+}
+
+// async function expire_otp_after_10min(id)
+// {
+//     let searched_user = await User.findById(id);
+//     console.log('in expire_otp_after_10min');
+//     console.log(id);
+//     console.log(searched_user);
+//     searched_user.otp = "";
+
+//     await User.findByIdAndUpdate(id, searched_user);
+// }
+
+/////////////////////////////////
+// Email Notification
+//Etheral
+async function sendVerificationEmail1(user_email) {
+    // Generate test SMTP service account from ethereal.email
+    // Only needed if you don't have a real mail account for testing
+    //let testAccount = await nodemailer.createTestAccount();
+  
+    // create reusable transporter object using the default SMTP transport
+    let transporter = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: 'sydnee.ebert@ethereal.email', // generated ethereal user
+        pass: 'wH6QaN7auQ9auFC2DC', // generated ethereal password
+      },
+    });
+  
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+      from: 'sydnee.ebert@ethereal.email', // sender address
+      to: user_email, // list of receivers
+      subject: "Hello ✔", // Subject line
+      text: "Hello world?", // plain text body
+      html: "<b>Hello world?</b>", // html body
+    });
+  
+    console.log("Message sent: %s", info.messageId);
+    // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+  
+    // Preview only available when sending through an Ethereal account
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    // Preview URL: https://ethereal.email/message/WaQKMgKddxQDoou...
+  }
+  
+  //main().catch(console.error);
+/////
+function textSentToUserOnRegister()
+{
+    const text = "Welcome " +user_name + " to Goal Planner!!! \n \
+    Goal Planner is a web-based application that helps you set and achieve your personal and professional goals. Our platform provides you with the tools and resources you need to stay organized, track your progress, and stay motivated as you work towards your goals. \
+    Our mission is to help individuals reach their full potential by providing a simple and effective way to set and achieve their goals. Whether you're looking to improve your health and fitness, advance your career, or pursue a personal passion, Goal Planner can help you get there."
+
+    return text;
+}
+
+function sendVerificationEmail(user_email, text, subject)
+{
+    console.log('in sendVerificationEmail func')
+let transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: {
+        user: 'goalplannergs@gmail.com',
+        pass: 'jhvnvbnqiutbzuoz'
+    }
+});
+
+let message = {
+    from: 'goalplannergs@gmail.com',
+    to: user_email,
+    subject: subject,
+    text: text
+};
+
+transporter.sendMail(message, function(error, info) {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log('Email sent: ' + info.response);
+    }
+});
+
+}
+
+
+///////////////////////////////
 
 //Middleware func
 //check if user is logged in
@@ -142,6 +244,85 @@ function verifyJwtToken(req,res,next)
 
 app.get('/',(req,res)=>{
     res.render('home');
+})
+
+app.get('/reset', (req,res)=>{
+    res.render('reset_password' ,{otp_form: false});
+})
+
+app.post('/reset/:email', async (req,res)=>{
+    //check email in db
+    const email = (req.params.email == 'undefined')? req.body.email : req.params.email;
+    const checked_user = await User.findOne({email: email})
+
+
+    if(checked_user)
+    {
+        // email is correct, send otp to email
+        let otp = randomNumberGeneratorForOtp().toString();
+        let subject = "Otp verification";
+        let text = "Your Otp: " + otp;
+        sendVerificationEmail(email, text, subject);
+        const id = checked_user._id;
+    
+        checked_user.otp = otp;
+    
+        await User.findByIdAndUpdate(id, checked_user);
+        
+        setTimeout(async function expire_otp_after_10min()
+        {
+            let searched_user = await User.findById(id);
+            console.log('in expire_otp_after_10min');
+            console.log(id);
+            console.log(searched_user);
+            searched_user.otp = null;
+        
+            await User.findByIdAndUpdate(id, searched_user);
+        }, 600000);
+        res.render('reset_password', {otp_form: true, user: checked_user})
+
+    }
+    else{
+        console.log('This email is not registered with us!');
+        res.redirect('/signUp');
+    }
+})
+
+app.post('/otp_verification/:email',async  (req,res)=>{
+    const email = req.params.email;
+    let searched_user = await User.find({email: email})
+    console.log(searched_user[0]);
+    const id = searched_user[0]._id;
+    let otp = req.body.otp;
+    console.log(searched_user[0].otp, otp);
+
+    if(searched_user[0].otp === otp)
+    {
+        //otp is correct
+        // render reset password form page
+        res.render("reset_form", {user_id: id});
+    }
+    else{
+        console.log("Otp does not match");
+        res.render("reset_password",{otp_form: true, user: searched_user[0]});
+    }
+
+    
+})
+
+app.post('/reset_password/:id', async (req,res)=>{
+    let password = req.body.pass1;
+    let id = req.params.id;
+    let user = await User.findById(id);
+    let hashed_password = bcrypt.hashSync(password, saltRounds);
+    user.password = hashed_password;
+    await User.findByIdAndUpdate(id, user);
+    // send mail to user stating password reset
+    let text = "Your password is succesfully reset\n Please login using new password";
+    let subject = "Reset password Intimation";
+    sendVerificationEmail(user.email, text, subject);
+    res.redirect('/login');
+
 })
 
 app.get('/home/:id',verifyJwtToken,async (req,res)=>{
@@ -269,9 +450,16 @@ app.post('/signUp',async (req,res)=>{
         res.redirect('/login')
     }
     else{
+        let subject = 'Succesfully SignedUp in GoalPlanner';
+        let text = "Welcome " +req.body.name + " to Goal Planner!!! \n \
+        Goal Planner is a web-based application that helps you set and achieve your personal and professional goals. Our platform provides you with the tools and resources you need to stay organized, track your progress, and stay motivated as you work towards your goals. \
+        Our mission is to help individuals reach their full potential by providing a simple and effective way to set and achieve their goals. Whether you're looking to improve your health and fitness, advance your career, or pursue a personal passion, Goal Planner can help you get there."
+        sendVerificationEmail(email, text, subject);
     await User.create(user);
     res.redirect('/login')
     }
+
+    
 
 })
 
